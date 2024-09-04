@@ -2,19 +2,25 @@ import {useEffect} from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations'
-import { useUserContext } from '@/context/AuthContext'
+import { INITIAL_USER, useUserContext } from '@/context/AuthContext'
 import { sidebarLinks } from '@/constants'
 import { INavLink } from '@/types'
+import { Loader } from 'lucide-react'
 
 const LeftSidebar = () => {
+  const navigate = useNavigate();
   const {pathname} = useLocation();
-    const { mutate: signOut, isSuccess } = useSignOutAccount();
-    const navigate = useNavigate();
-    const { user } = useUserContext();
+  const { user,setUser, setIsAuthenticated, isLoading } = useUserContext();
 
-    useEffect(()=>{
-        if(isSuccess) navigate(0);
-    }, [isSuccess])
+  const { mutate: signOut} = useSignOutAccount();
+
+    const handleSignOut = async(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>{
+      e.preventDefault();
+      signOut();
+      setIsAuthenticated(false);
+      setUser(INITIAL_USER);
+      navigate("/sign-in");
+    }
 
   return (
     <nav className="leftsidebar">
@@ -29,7 +35,12 @@ const LeftSidebar = () => {
           />
         </Link>
 
-        <Link to={`/profile/${user.id}`}
+        {isLoading || !user.email ?(
+          <div className="h-14">
+            <Loader/>
+          </div>
+        ):(
+          <Link to={`/profile/${user.id}`}
         className="flex gap-3 items-center">
           <img
             src={user.imageUrl || "/assests/icons/profile-placeholder.svg"}
@@ -45,6 +56,10 @@ const LeftSidebar = () => {
             </p>
           </div>
         </Link>
+
+        )}
+
+        
         <ul className="flex flex-col gap-6">
           {sidebarLinks.map((link: INavLink)=>{
             const isActive = pathname === link.route;
@@ -68,18 +83,15 @@ const LeftSidebar = () => {
                   {link.label}
                 </NavLink>
               </li>
-            )
+            );
           })}
-          <li>
-
-          </li>
         </ul>
       </div>
 
       <Button 
         variant="ghost" 
         className="shad-button_ghost"
-        onClick={() => signOut()}>
+        onClick={(e) => handleSignOut(e)}>
         <img src="/assets/icons/logout.svg" alt="logout"/>
         <p className="small-medium 
         lg:base-medium">Logout</p>
