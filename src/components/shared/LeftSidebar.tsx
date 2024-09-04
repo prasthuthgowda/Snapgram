@@ -9,7 +9,7 @@ import { Loader } from 'lucide-react'
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const {pathname} = useLocation();
-  const { user,setUser, setIsAuthenticated, isLoading } = useUserContext();
+  const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
 
   const { mutate: signOut} = useSignOutAccount();
 
@@ -55,9 +55,7 @@ const LeftSidebar = () => {
             </p>
           </div>
         </Link>
-
-        )}
-
+        )}     
         
         <ul className="flex flex-col gap-6">
           {sidebarLinks.map((link: INavLink)=>{
